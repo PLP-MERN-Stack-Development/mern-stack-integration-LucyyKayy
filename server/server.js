@@ -9,8 +9,6 @@ const path = require('path');
 
 // Import routes
 const postRoutes = require('./routes/posts');
-const categoryRoutes = require('./routes/categories');
-const authRoutes = require('./routes/auth');
 
 // Load environment variables
 dotenv.config();
@@ -24,7 +22,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve uploaded files
+// Serve uploaded files (if needed)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Log requests in development mode
@@ -37,8 +35,6 @@ if (process.env.NODE_ENV === 'development') {
 
 // API routes
 app.use('/api/posts', postRoutes);
-app.use('/api/categories', categoryRoutes);
-app.use('/api/auth', authRoutes);
 
 // Root route
 app.get('/', (req, res) => {
@@ -56,7 +52,10 @@ app.use((err, req, res, next) => {
 
 // Connect to MongoDB and start server
 mongoose
-  .connect(process.env.MONGODB_URI)
+  .connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  })
   .then(() => {
     console.log('Connected to MongoDB');
     app.listen(PORT, () => {
@@ -71,8 +70,7 @@ mongoose
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
   console.error('Unhandled Promise Rejection:', err);
-  // Close server & exit process
   process.exit(1);
 });
 
-module.exports = app; 
+module.exports = app;
